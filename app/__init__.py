@@ -1,10 +1,11 @@
 from flask import Flask
-from ..config import Config
-from .extensions import db
+from config import Config
+from .extensions import db  
 from flask_login import LoginManager
 from flask_debugtoolbar import DebugToolbarExtension
+from flask_migrate import Migrate
 from .rbac import rbac
-from .admin import init_admin
+from .app_admin import init_admin
 
 def create_app(config_class=Config) -> Flask:
     
@@ -15,19 +16,21 @@ def create_app(config_class=Config) -> Flask:
     login_manager = LoginManager()
     login_manager.login_view = "auth.login"
     
-    from .models.users import Users
+    from .models.users import User
     @login_manager.user_loader
-    def load_user(id: int) -> Users:
-        return Users.query.get(id=id)
+    def load_user(id: int) -> User:
+        return User.query.get(id=id)
     
     rbac.init_app(app)
     
     #maybe it will not work
-    init_admin(app).init_app(app)
+    admin = init_admin(app)
     
     toolbar = DebugToolbarExtension()
     
     toolbar.init_app(app)
+    
+    migrate = Migrate(app, db)
         
     from .main import bp as main_bp
     app.register_blueprint(main_bp)

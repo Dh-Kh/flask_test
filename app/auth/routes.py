@@ -2,7 +2,7 @@ from flask import render_template, redirect, url_for, request
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required
 from ..auth import bp
-from ..models.users import Users
+from ..models.users import User
 from ..extensions import db
 
 
@@ -10,7 +10,7 @@ from ..extensions import db
 def login():
     #check if user doesn't exist
     if request.method == "POST":
-        user = Users().query.get(username=request.form.get("username"))
+        user = User().query.get(username=request.form.get("username"))
         if user.password == request.form.get("password"):
             login_user(user, remember=True)
             return redirect(url_for(""))
@@ -21,8 +21,9 @@ def login():
 def register():
     # in register need to create type of user role using checkboxes
     #check if user already exists
+    #add permissions to split users into groups
     if request.method == "POST":
-        user = Users(
+        user = User(
             username=request.form.get("username"),
             password=request.form.get("password"),
             email=request.form.get("email"),

@@ -18,7 +18,7 @@ users_roles = db.Table(
     )
 
 @rbac.as_user_model
-class Users(UserMixin, RBACUserMixin, db.Model):
+class User(UserMixin, RBACUserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), unique=True)
     password = db.Column(db.String(255))

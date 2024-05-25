@@ -1,10 +1,12 @@
-from app import create_app
-from app.extensions import db
-from flask_migrate import Migrate
+from flask import current_app
+from flask.cli import FlaskGroup, with_appcontext
+from app.models.tickets import Tickets
+from app import current_app as init_app
 
-app = create_app()
-#don't forget about commands
-migrate = Migrate(app, db)
+cli = FlaskGroup()
+
+def generate_models():
+    pass
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    pass
