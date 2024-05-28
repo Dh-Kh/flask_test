@@ -23,7 +23,6 @@ class User(UserMixin, RBACUserMixin, db.Model):
     email = db.Column(db.String(255), unique=True)
     password = db.Column(db.String(255))
     username =  db.Column(db.String(255))
-    #check meaning of db.relationship SQL-Alchemy
     roles = db.relationship(
         "Role",
         secondary=users_roles,
@@ -40,6 +39,13 @@ class User(UserMixin, RBACUserMixin, db.Model):
     def get_roles(self):
         for role in self.roles:
             yield role
+            
+    def has_role(self, role_name: str) -> bool:
+        for role in self.roles:
+            if role.name == role_name:
+                return True
+        return False
+    
             
             
 @rbac.as_role_model

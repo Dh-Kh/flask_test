@@ -6,6 +6,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from flask_migrate import Migrate
 from .rbac import rbac
 from .app_admin import init_admin
+import click
 
 def create_app(config_class=Config) -> Flask:
     
@@ -23,8 +24,9 @@ def create_app(config_class=Config) -> Flask:
     
     rbac.init_app(app)
     
-    #maybe it will not work
     admin = init_admin(app)
+    
+    #check than admin works and debugtoolbar
     
     toolbar = DebugToolbarExtension()
     
@@ -37,4 +39,16 @@ def create_app(config_class=Config) -> Flask:
     
     from .auth import bp as auth_bp
     app.register_blueprint(auth_bp, url_prefix="/auth")
+    
+    from .commands import generate_roles
+    @app.cli.command("generate_roles")
+    def generate_roles_cli() -> None:
+        generate_roles()
+        
+    from .commands import generate_tickets
+    @app.cli.command("generate_tickets")
+    @click.argument("amount", type=int)
+    def generate_tickets_cli(amount: int) -> None:
+        generate_tickets(amount)
+
     return app
