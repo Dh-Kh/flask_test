@@ -22,7 +22,7 @@ class User(UserMixin, RBACUserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), unique=True)
     password = db.Column(db.String(255))
-    username =  db.Column(db.String(255))
+    username =  db.Column(db.String(255), unique=True)
     roles = db.relationship(
         "Role",
         secondary=users_roles,

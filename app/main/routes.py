@@ -1,4 +1,4 @@
-from flask import render_template
+from flask import render_template, request
 from ..main import bp
 from ..models.tickets import Tickets
 from flask_login import current_user, login_required
@@ -21,7 +21,7 @@ class CRUDTickets:
     
     
 
-@bp.route("/dashboard")
+@bp.route("/dashboard", methods=["GET"])
 @login_required
 def display_tickets():
     tickets = None
@@ -31,5 +31,16 @@ def display_tickets():
         tickets = Tickets.query.filter(user_group="manager")
     else:
         tickets = Tickets.query.filter(user_group="analyst")
-    
+        
     render_template("base.html", tickets=tickets)
+    
+@bp.route("/ticket", methods=["POST, PATCH, DELETE"])
+def get_ticket():
+    ticket_id = request.args.get("id", default=None, type=int)
+    ticket_field = request.args.get("field", default=None, type=str)
+    
+    return render_template()
+
+@bp.route("/test", methods=["GET"])
+def test():
+    render_template("base.html")

@@ -8,6 +8,5 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     RBAC_USE_WHITE = True
     FLASK_ADMIN_SWATCH = "cerulean"
-    debug = True
     #EXPORT need to use
     
