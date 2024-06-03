@@ -5,7 +5,7 @@ from flask_login import LoginManager
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
-from .rbac import rbac
+from .app_rbac import rbac
 from .app_admin import init_admin
 import click
 
@@ -29,9 +29,7 @@ def create_app(config_class=Config) -> Flask:
     rbac.init_app(app)
     
     admin = init_admin(app)
-    
-    #check than admin works and debugtoolbar
-    
+        
     toolbar = DebugToolbarExtension()
     
     toolbar.init_app(app)
@@ -44,6 +42,8 @@ def create_app(config_class=Config) -> Flask:
     from .auth import bp as auth_bp
     app.register_blueprint(auth_bp)
     
+    
+    #need to implement before first request
     from .commands import generate_roles
     @app.cli.command("generate_roles")
     def generate_roles_cli() -> None:

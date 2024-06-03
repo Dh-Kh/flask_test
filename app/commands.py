@@ -16,7 +16,7 @@ def generate_roles() -> None:
     db.session.add(analyst_role)
     db.session.commit()
     
-
+    
 def generate_tickets(amount: int) -> None:
     for i in range(amount):
         try:

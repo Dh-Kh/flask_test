@@ -1,4 +1,4 @@
-from flask import render_template, request
+from flask import render_template, request, render_template_string
 from ..main import bp
 from ..models.tickets import Tickets
 from flask_login import current_user, login_required
@@ -43,4 +43,4 @@ def get_ticket():
 
 @bp.route("/test", methods=["GET"])
 def test():
-    render_template("base.html")
+    return render_template_string("<h1>Hello</h1>")

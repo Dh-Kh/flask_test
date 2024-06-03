@@ -1,9 +1,8 @@
 from ..extensions import db
 from flask_login import UserMixin
-from flask_rbac import UserMixin as RBACUserMixin, RoleMixin
-from ..rbac import rbac
+from ..rbac.models import UserMixin as RBACUserMixin, RoleMixin
+from ..app_rbac import rbac
 
-#add Migration
 
 roles_parents = db.Table(
     "roles_parents",
@@ -18,7 +17,7 @@ users_roles = db.Table(
     )
 
 @rbac.as_user_model
-class User(UserMixin, RBACUserMixin, db.Model):
+class User(UserMixin, db.Model, RBACUserMixin):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), unique=True)
     password = db.Column(db.String(255))
