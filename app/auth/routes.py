@@ -12,12 +12,12 @@ from ..extensions import db
 #@rbac.allow(['anonymous'], methods=["GET", 'POST'])
 def login():
     if request.method == "POST":
-        user = User.query.filter(username=request.form.get("username")).first()
+        user = User.query.filter_by(username=request.form.get("username")).first()
         if not user:
             return render_template("auth/login.html", error_message="User doesn't exist")
         if check_password_hash(user.password, request.form.get("password")):  
             login_user(user, remember=True)
-            return redirect(url_for("main.dashboard"))
+            return redirect(url_for("main.test"))
 
     return render_template("auth/login.html")
 
