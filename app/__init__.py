@@ -1,8 +1,7 @@
-from flask import Flask
+from flask import Flask, redirect, url_for, request
 from config import Config
 from .extensions import db  
 from flask_login import LoginManager
-from flask_debugtoolbar import DebugToolbarExtension
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
 from .app_rbac import rbac
@@ -24,27 +23,30 @@ def create_app(config_class=Config) -> Flask:
     from .models.users import User
     @login_manager.user_loader
     def load_user(id: int) -> User:
-        return User.query.filter_by(id=id).first()
+        return User.query.get(id)
     
+    @login_manager.unauthorized_handler
+    def unauthorized():
+        return redirect(url_for("auth.login"))
+    
+    @app.errorhandler(404)
+    def page_not_found(e):
+        return redirect(request.referrer or url_for("admin.index"))
+    
+    @app.errorhandler(403)
+    def page_forbidden(e):
+        return redirect(request.referrer or url_for("admin.index"))
+        
     rbac.init_app(app)
     
     admin = init_admin(app)
-    
-    #implement toolbar    
-    toolbar = DebugToolbarExtension()
-    
-    toolbar.init_app(app)
-    
+            
     migrate = Migrate(app, db)
         
-    from .main import bp as main_bp
-    app.register_blueprint(main_bp)
-    
     from .auth import bp as auth_bp
     app.register_blueprint(auth_bp)
     
     
-    #need to implement before first request
     from .commands import generate_roles
     @app.cli.command("generate_roles")
     def generate_roles_cli() -> None:

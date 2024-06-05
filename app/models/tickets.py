@@ -16,7 +16,7 @@ tickets_type = db.Table(
 
 class Tickets(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    status = db.Column(Enum(StatusEnum), default=StatusEnum.PENDING, 
+    status = db.Column(Enum(StatusEnum), default=StatusEnum.PENDING.value, 
                        nullable=False)
     user_group = db.relationship("Group", 
                             secondary=tickets_type,

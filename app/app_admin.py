@@ -1,15 +1,24 @@
-from flask_admin import Admin
+from flask_admin import Admin, AdminIndexView, expose
 from flask_admin.contrib.sqla import ModelView
-from flask import Flask
-from flask_login import current_user
+from flask import Flask, redirect, url_for
+from flask_login import current_user, logout_user
 from .models.tickets import Tickets
 from .models.users import User, Role, Group
-
-
 from .extensions import db
 
-#fix command which generated users incorrect role assigment in txt file!
+class CustomAdminIndexView(AdminIndexView):
+    @expose("/")
+    def index(self):
+        if not current_user.is_authenticated:
+            return redirect(url_for("auth.login"))
+        return super(CustomAdminIndexView, self).index()
 
+    @expose("/logout")
+    def logout(self):
+        logout_user()
+        return redirect(url_for('auth.login'))
+
+    
 class UserModelView(ModelView):
     
     can_create = False
@@ -18,7 +27,7 @@ class UserModelView(ModelView):
     
     can_delete = True
     
-    column_list = ("id", "username", "email", )
+    column_list = ("id", "username", "email",)
     
     page_size = 50  
     
@@ -29,7 +38,7 @@ class UserModelView(ModelView):
         return current_user.is_authenticated and current_user.has_role("admin")
     
     def inaccessible_callback(self, name, kwargs):
-        return "No access"
+        return redirect(url_for('auth.login'))
     
     def get_query(self):
         return super().get_query().join(User.roles).filter(Role.name != "admin")
@@ -50,13 +59,13 @@ class TicketsModelView(ModelView):
     
     page_size = 50
     
-    column_searchable_list = ["id", 'status', "user_group"]
+    column_searchable_list = ["id", 'status', "user_group.group_name"]
     
     def is_accessible(self):
         return current_user.is_authenticated
     
     def inaccessible_callback(self, name, kwargs):
-        return "No access"
+        return redirect(url_for('auth.login'))
     
     def get_query(self):
         if current_user.has_role("admin"):
@@ -82,7 +91,7 @@ class GroupModelView(ModelView):
 
 
 def init_admin(app: Flask) -> Admin:
-    admin = Admin(app, name="admin-panel", template_mode="bootstrap3")
+    admin = Admin(app, name="admin-panel", template_mode="bootstrap3", index_view=CustomAdminIndexView())
     admin.add_view(UserModelView(User, db.session, name="users"))
     admin.add_view(TicketsModelView(Tickets, db.session, name="tickets"))
     admin.add_view(GroupModelView(Group, db.session, name="groups"))

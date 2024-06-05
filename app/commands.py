@@ -1,9 +1,10 @@
 from .models.users import Role, User, Group
 from .models.tickets import Tickets
 from .extensions import db
-from random import randint, choice
+from random import choice
 from faker import Faker
 from pathlib import Path
+from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import generate_password_hash
 
 
@@ -16,7 +17,7 @@ def generate_roles() -> None | str:
         db.session.add(manager_role)
         db.session.add(analyst_role)
         db.session.commit()
-    except Exception as e:
+    except SQLAlchemyError as e:
         db.session.rollback()
         return e
     
@@ -29,20 +30,22 @@ def generate_groups() -> None | str:
         db.session.add(manager_group)
         db.session.add(analyst_group)
         db.session.commit()
-    except Exception as e:
+    except SQLAlchemyError as e:
         db.session.rollback()
         return e
     
 def generate_tickets(amount: int) -> None | str:
     for i in range(amount):
+        status_list = ["Pending", "In review", "Closed"]
+        all_groups = Group.query.all()
         try:
             ticket = Tickets(
-                status=["Pending", "In review", "Closed"][randint(0, 2)],
-                user_group=Group.query.filter_by(group_name=["Customer1", "Customer2", "Customer3"][randint(0, 2)]),
+                status=choice(status_list),
+                user_group=all_groups,
                 note=f"Note number: {i}")
             db.session.add(ticket)
             db.session.commit()
-        except Exception as e:
+        except SQLAlchemyError as e:
             db.session.rollback()
             return e
     
@@ -57,7 +60,6 @@ def generate_user_groups(users_per_group: int) -> None | str:
                 users = User(
                     username=faker.user_name(),
                     email=faker.email(),
-                    password=generate_password_hash(faker.password(length=10))
                 )
                 
                 all_roles = Role.query.all()
@@ -77,13 +79,15 @@ def generate_user_groups(users_per_group: int) -> None | str:
                 if group:
                     group.users.append(users)
 
+                password = faker.password(length=10)
+
                 file.write(
-                    f"Username: {users.username}, Email: {users.email}, Password: {faker.password(length=10)}, Role: {users.display_role}\n"
+                    f"Username: {users.username}, Email: {users.email}, Password: {password}, Role: {users.display_role}\n"
                 )
+                users.set_password(password)
                 db.session.add(users)
                 db.session.commit()
                 
-                
-            except Exception as e: 
+            except SQLAlchemyError as e: 
                 db.session.rollback()
                 return str(e)
