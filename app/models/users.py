@@ -45,12 +45,17 @@ class User(UserMixin, db.Model, RBACUserMixin):
                 return True
         return False
     
+    @property
+    def display_role(self) -> str:
+        return self.roles[0].name
+        
+    
             
             
 @rbac.as_role_model
 class Role(db.Model, RoleMixin):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(20))
+    name = db.Column(db.String(20), unique=True)
     parents = db.relationship(
         "Role",
         secondary=roles_parents,
@@ -58,6 +63,13 @@ class Role(db.Model, RoleMixin):
         secondaryjoin=(id==roles_parents.c.parent_id),
         backref=db.backref("children", lazy="dynamic")
         )
+    
+    """
+    adding classmethod to avoid Notimplementederror
+    """
+    @classmethod
+    def get_all(cls):
+        return cls.query.all()
     
     def __init__(self, name: str) -> None:
         RoleMixin.__init__(self)
@@ -73,4 +85,19 @@ class Role(db.Model, RoleMixin):
     @staticmethod
     def get_by_name(name):
         return Role.query.filter_by(name=name).first()
+    
+users_groups = db.Table(
+    "users_groups",
+    db.Column("user_id", db.Integer, db.ForeignKey("user.id")),
+    db.Column("group_id", db.Integer, db.ForeignKey("group.id"))
+    )
+    
+class Group(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    group_name = db.Column(db.String(20), unique=True)
+    users = db.relationship(
+        "User",
+        secondary=users_groups,
+        backref=db.backref("users", lazy=True)
+    )
     

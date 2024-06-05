@@ -24,12 +24,13 @@ def create_app(config_class=Config) -> Flask:
     from .models.users import User
     @login_manager.user_loader
     def load_user(id: int) -> User:
-        return User.query.get(id=id)
+        return User.query.filter_by(id=id).first()
     
     rbac.init_app(app)
     
     admin = init_admin(app)
-        
+    
+    #implement toolbar    
     toolbar = DebugToolbarExtension()
     
     toolbar.init_app(app)
@@ -49,16 +50,23 @@ def create_app(config_class=Config) -> Flask:
     def generate_roles_cli() -> None:
         generate_roles()
         
-    from .commands import generate_tickets
-    @app.cli.command("generate_tickets")
-    @click.argument("amount", type=int)
-    def generate_tickets_cli(amount: int) -> None:
-        generate_tickets(amount)
-
+    from .commands import generate_groups
+    @app.cli.command("generate_groups")
+    def generate_groups_cli() -> None:
+        generate_groups()
+        
     from .commands import generate_user_groups
     @app.cli.command("generate_user_groups")
     @click.argument("users_per_group", type=int)
     def generate_user_groups_cli(users_per_group: int) -> None:
         generate_user_groups(users_per_group)
+        print("userData.txt added to Downloads folder")
+        
+    from .commands import generate_tickets
+    @app.cli.command("generate_tickets")
+    @click.argument("amount", type=int)
+    def generate_tickets_cli(amount: int) -> None:
+        generate_tickets(amount)
+        
 
     return app
