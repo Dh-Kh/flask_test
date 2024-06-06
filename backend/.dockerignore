@@ -1,0 +1,7 @@
+venv
+migrations
+files
+.git
+*.pyc
+*~
+__pycache__

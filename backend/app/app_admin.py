@@ -67,21 +67,28 @@ class TicketsModelView(ModelView):
     def inaccessible_callback(self, name, kwargs):
         return redirect(url_for('auth.login'))
     
+        
     def get_query(self):
+        query = super().get_query()  
         if current_user.has_role("admin"):
-            return super().get_query()
-        elif current_user.has_role("manager"):
-            return super().get_query().filter(group_name="Customer2")
+            return query
         else:
-            return super().get_query().filter(group_name="Customer3")
-    
+            query = query.join(Tickets.user_group)
+            if current_user.has_role("manager"):
+                return query.filter(Group.group_name=="Customer2")
+            else:
+                return query.filter(Group.group_name=="Customer3")
+
     def get_count_query(self):
+        query = super().get_count_query()  
         if current_user.has_role("admin"):
-            return super().get_count_query()
-        elif current_user.has_role("manager"):
-            return super().get_count_query().filter(group_name="Customer2")
+            return query
         else:
-            return super().get_count_query().filter(group_name="Customer3")
+            query = query.join(Tickets.user_group)
+            if current_user.has_role("manager"):
+                return query.filter(Group.group_name=="Customer2")
+            else:
+                return query.filter(Group.group_name=="Customer3")
         
 class GroupModelView(ModelView):
     can_create = False

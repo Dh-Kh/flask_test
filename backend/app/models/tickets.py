@@ -1,9 +1,10 @@
+import enum
 from ..extensions import db
 from enum import Enum as EnumType
 from sqlalchemy import Enum
 
-
-class StatusEnum(EnumType):
+@enum.unique
+class StatusEnum(str, EnumType):
     PENDING = "Pending"
     IN_REVIEW = "In review"
     CLOSED = "Closed"
@@ -16,7 +17,10 @@ tickets_type = db.Table(
 
 class Tickets(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    status = db.Column(Enum(StatusEnum), default=StatusEnum.PENDING.value, 
+    status = db.Column(Enum(StatusEnum,
+                            native_enum=False,
+                            length=60,
+                            ), 
                        nullable=False)
     user_group = db.relationship("Group", 
                             secondary=tickets_type,

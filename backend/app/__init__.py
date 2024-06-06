@@ -62,7 +62,7 @@ def create_app(config_class=Config) -> Flask:
     @click.argument("users_per_group", type=int)
     def generate_user_groups_cli(users_per_group: int) -> None:
         generate_user_groups(users_per_group)
-        print("userData.txt added to Downloads folder")
+        print("userData.txt added to Files folder")
         
     from .commands import generate_tickets
     @app.cli.command("generate_tickets")

@@ -3,9 +3,8 @@ from .models.tickets import Tickets
 from .extensions import db
 from random import choice
 from faker import Faker
-from pathlib import Path
 from sqlalchemy.exc import SQLAlchemyError
-from werkzeug.security import generate_password_hash
+import os
 
 
 def generate_roles() -> None | str:
@@ -52,7 +51,13 @@ def generate_tickets(amount: int) -> None | str:
 
 def generate_user_groups(users_per_group: int) -> None | str:
     faker = Faker()
-    path_to_store = str(Path.home() / "Downloads")
+    
+    FILE_DIR = "files"
+    
+    if not os.path.exists(FILE_DIR):
+        os.makedirs(FILE_DIR, exist_ok=True)
+    
+    path_to_store = FILE_DIR
 
     with open(f"{path_to_store}/userData.txt", "w") as file:
         for i in range(users_per_group):
